@@ -84,7 +84,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         tbleObjectValidos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         tbleObjectValidos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-
+                null
             },
             new String [] {
 
@@ -197,7 +197,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         tbleObjectInvalidos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         tbleObjectInvalidos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {}
+                null
             },
             new String [] {
 
