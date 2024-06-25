@@ -29,6 +29,8 @@ public class LoadingJDialog extends javax.swing.JDialog {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel1.setText("Cargando...");
 
+        loadP.setStringPainted(true);
+
         jLabel2.setText("Proceso:");
 
         OpRealizadas.setText("0/0");
@@ -77,18 +79,23 @@ public class LoadingJDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     public void setProgress(int progress) {
-        loadP.setValue(progress);
+        if (progress <= loadP.getMaximum()) {
+            loadP.setValue(progress);
+        }
     }
+
     public void setStatus(String status) {
         OpRealizadas.setText(status);
     }
-    public void setMaxValue(int i){
+
+    public void setMaxValue(int i) {
         loadP.setMaximum(i);
     }
-    public int getMaxValue(){
+
+    public int getMaxValue() {
         return loadP.getMaximum();
     }
-    
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel OpRealizadas;

@@ -312,8 +312,8 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                     setAlwaysOnTop(false);
                 }
             }, selectEntity.getSelectedItem().toString(), f);
-        }else{
-            
+        } else {
+
         }
     }//GEN-LAST:event_SelectFileBtnMouseClicked
 
@@ -322,7 +322,18 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         File f = StartfileChooser(this.FILE_CHOOSER_EXPORT);
 
         if (f != null) {
-            ExportReportExcel(f, listEntitysValidos);
+            LoadingJDialog l = new LoadingJDialog(this, false);
+            l.setVisible(true);
+            setAlwaysOnTop(true);
+            this.setEnabled(false);
+
+            ExportReportExcel(l, new Callback() {
+                public void onComplete(ArrayList<ArrayList> a) {
+                    JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
+                    setEnabled(true);
+                    setAlwaysOnTop(false);
+                }
+            }, f, listEntitysValidos);
         }
     }//GEN-LAST:event_SaveReportBtnAdmMouseClicked
 
@@ -330,7 +341,18 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         File f = StartfileChooser(this.FILE_CHOOSER_EXPORT);
 
         if (f != null) {
-            ExportReportExcel(f, listEntitysInvalidos);
+            LoadingJDialog l = new LoadingJDialog(this, false);
+            l.setVisible(true);
+            setAlwaysOnTop(true);
+            this.setEnabled(false);
+
+            ExportReportExcel(l, new Callback() {
+                public void onComplete(ArrayList<ArrayList> a) {
+                    JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
+                    setEnabled(true);
+                    setAlwaysOnTop(false);
+                }
+            }, f, listEntitysInvalidos);
         }
     }//GEN-LAST:event_SaveReportBtnNoAdmMouseClicked
 
@@ -379,66 +401,94 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     }
 
     //private void ExportReportExcel(File f, ArrayList<? extends Exportables> list)//ArrayList de tipo generico q esta obligado a que herede de la clase Exportables
-    private <T extends Exportables> void ExportReportExcel(File f, ArrayList<T> list) {//T Generico que obliga a que el parametro generico herede de la clase Exportables
-        if (!list.isEmpty()) {
-            OutputStream outFile;
-            try (XSSFWorkbook libro = new XSSFWorkbook()) {
-                outFile = new FileOutputStream(f);
+    private <T extends Exportables> void ExportReportExcel(LoadingJDialog l, Callback callback, File f, ArrayList<T> list) {//T Generico que obliga a que el parametro generico herede de la clase Exportables
+        Thread tr = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (!list.isEmpty()) {
+                    l.setMaxValue(list.size());
+                    OutputStream outFile;
+                    try (XSSFWorkbook libro = new XSSFWorkbook()) {
+                        outFile = new FileOutputStream(f);
 
-                XSSFCellStyle estiloTitulos = new estilo.BuilderCell()
-                        .setBoldText(true)
-                        .setColorText("FFFFFF")
-                        .setColorFondoHEX("")
-                        .setTipoDeRellenoFondo(FillPatternType.SOLID_FOREGROUND)
-                        .contruirEstilo(libro);
-                XSSFCellStyle estiloFecha = new estilo.BuilderCell().setFontFormat("dd/MM/yyyy").contruirEstilo(libro);
+                        XSSFCellStyle estiloTitulos = new estilo.BuilderCell()
+                                .setBoldText(true)
+                                .setColorText("FFFFFF")
+                                .setColorFondoHEX("")
+                                .setTipoDeRellenoFondo(FillPatternType.SOLID_FOREGROUND)
+                                .contruirEstilo(libro);
+                        XSSFCellStyle estiloFecha = new estilo.BuilderCell().setFontFormat("dd/MM/yyyy").contruirEstilo(libro);
+                        XSSFSheet createSheet = libro.createSheet();
 
-                XSSFSheet createSheet = libro.createSheet();
-                for (int i = 0; i <= list.size(); i++) {
-                    XSSFRow createRow = createSheet.createRow(i);
+                        int indexRenglon = 0;
 
-                    for (int j = 0; j < list.get(0).getTitulosAtributos().length; j++) {
-                        XSSFCell createCell = createRow.createCell(j);
-                        if (i == 0) {
-                            createCell.setCellStyle(estiloTitulos);
-                            createCell.setCellValue((String) list.get(i).getTitulosAtributos()[j]);
-                        } else {
-                            //Obtengo un elemento del array de atributos de la clase de usuarios en la clase generica.
-                            Object a = list.get((i - 1)).getRow()[j];
-                            if (a instanceof String aa) {//Consulta si a es una instancia de String, si es asi lo cartea como aa
-                                createCell.setCellValue(aa);
-                            } else if (a instanceof Double double1) {
-                                createCell.setCellValue(double1);
-                            } else if (a instanceof Integer integer) {
-                                createCell.setCellValue(integer);
-                            } else if (a instanceof LocalDate date) {
-                                createCell.setCellValue(date);
-                                createCell.setCellStyle(estiloFecha);
-                            } else {
-                                if (a == null) {
-                                    a = "";
+                        for (int i = 0; i <= list.size(); i++) {
+                            XSSFRow createRow = createSheet.createRow(i);
+
+                            for (int j = 0; j < list.get(0).getTitulosAtributos().length; j++) {
+                                XSSFCell createCell = createRow.createCell(j);
+                                if (i == 0) {
+                                    createCell.setCellStyle(estiloTitulos);
+                                    createCell.setCellValue((String) list.get(i).getTitulosAtributos()[j]);
+                                } else {
+                                    //Obtengo un elemento del array de atributos de la clase de usuarios en la clase generica.
+                                    Object a = list.get((i - 1)).getRow()[j];
+                                    if (a instanceof String aa) {//Consulta si a es una instancia de String, si es asi lo cartea como aa
+                                        createCell.setCellValue(aa);
+                                    } else if (a instanceof Double double1) {
+                                        createCell.setCellValue(double1);
+                                    } else if (a instanceof Integer integer) {
+                                        createCell.setCellValue(integer);
+                                    } else if (a instanceof LocalDate date) {
+                                        createCell.setCellValue(date);
+                                        createCell.setCellStyle(estiloFecha);
+                                    } else {
+                                        if (a == null) {
+                                            a = "";
+                                        }
+                                        createCell.setCellValue("" + a);
+                                    }
                                 }
-                                createCell.setCellValue("" + a);
-                            }
-                        }
-                        createSheet.autoSizeColumn(j);
+                                createSheet.autoSizeColumn(j);
 
+                            }
+
+                            // Actualizar la GUI dentro de SwingUtilities.invokeLater()
+                            final int currentValue = indexRenglon;
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    l.setProgress(currentValue);
+                                    l.setStatus(" " + currentValue + " / " + l.getMaxValue());
+                                }
+                            });
+                            indexRenglon++;
+                        }
+                        libro.write(outFile);
+                        //libro.close();
+                        outFile.close();
+                        if (l.getMaxValue() == (indexRenglon - 1)) {
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    l.dispose(); // Cerrar el diálogo de carga
+                                }
+                            });
+                            callback.onComplete(null);
+                        }
+
+                    } catch (FileNotFoundException ex) {
+                        System.out.println(ex);
+                    } catch (IOException ex) {
+                        System.out.println(ex);
                     }
 
-                    //System.out.println(i + " / " + list.size());
+                } else {
+                    JOptionPane.showMessageDialog(null, "No Hay informacion exportable.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
-                libro.write(outFile);
-                libro.close();
-                outFile.close();
-
-            } catch (FileNotFoundException ex) {
-                System.out.println(ex);
-            } catch (IOException ex) {
-                System.out.println(ex);
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "No Hay informacion exportable.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        });
+        tr.start();
 
     }
 
@@ -615,16 +665,17 @@ public class LectorExcelIGU extends javax.swing.JFrame {
 
     private <T extends Exportables> void llenarTabla(javax.swing.JTable tb, ArrayList<T> list) {
         ClearTable(tb);
-        javax.swing.table.DefaultTableModel dm = (javax.swing.table.DefaultTableModel) (tb.getModel());
         if (!list.isEmpty()) {
+            javax.swing.table.DefaultTableModel dm = (javax.swing.table.DefaultTableModel) (tb.getModel());
             for (String titulosAtributo : list.get(0).getTitulosAtributos()) {
                 dm.addColumn(titulosAtributo);
             }
             for (int j = 0; j < list.size(); j++) {
                 dm.addRow(list.get(j).getRow());
             }
+            tb.setModel(dm);
         }
-        tb.setModel(dm);
+        
     }
 
     public void ClearTable(javax.swing.JTable jTable) {
