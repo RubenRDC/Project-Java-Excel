@@ -48,8 +48,6 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     private ArrayList<Exportables> listEntitysInvalidos;
     private ArrayList<ArrayList> UsuariosVyI;
 
-    private Thread hiloExport, hiloImport;
-
     public LectorExcelIGU() {
         this.setResizable(false);
         initComponents();
@@ -293,26 +291,25 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                 @Override
                 public void onComplete(ArrayList<ArrayList> a) {
                     UsuariosVyI = a;
-                    JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
-                    setEnabled(true);
-                    setAlwaysOnTop(false);
                     if (UsuariosVyI != null) {
                         if (!(UsuariosVyI.get(0).isEmpty() & UsuariosVyI.get(1).isEmpty())) {
+                            JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
                             listEntitysValidos = UsuariosVyI.get(0);
                             listEntitysInvalidos = UsuariosVyI.get(1);
                             llenarTabla(tbleObjectValidos, listEntitysValidos);
                             llenarTabla(tbleObjectInvalidos, listEntitysInvalidos);
                         } else {//Si los dos Arrays estas vacios...
+                            JOptionPane.showMessageDialog(null, "El archivo no tiene informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
                             listEntitysValidos.clear();
                             listEntitysInvalidos.clear();
                             ClearTable(tbleObjectValidos);
                             ClearTable(tbleObjectInvalidos);
-                            JOptionPane.showMessageDialog(null, "El archivo no tiene informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
                         JOptionPane.showMessageDialog(null, "El archivo no es accesible o no contiene ninguna hoja.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
-
+                    setEnabled(true);
+                    setAlwaysOnTop(false);
                 }
             }, selectEntity.getSelectedItem().toString(), f);
         }else{

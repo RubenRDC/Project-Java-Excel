@@ -4,8 +4,8 @@ public class LoadingJDialog extends javax.swing.JDialog {
 
     public LoadingJDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        setLocationRelativeTo(null);
         initComponents();
+        this.setLocationRelativeTo(parent);
     }
 
     @SuppressWarnings("unchecked")
