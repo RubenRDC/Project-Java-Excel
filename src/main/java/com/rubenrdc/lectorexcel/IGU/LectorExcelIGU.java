@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -43,8 +44,9 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     private JFileChooser fileChooser;
     //private Workbook libro;
     private final int FILE_CHOOSER_EXPORT = 0, FILE_CHOOSER_IMPORT = 1;
-    private ArrayList<Exportables> listEntitysValidos = new ArrayList<>();
-    private ArrayList<Exportables> listEntitysInvalidos = new ArrayList<>();
+    private ArrayList<Exportables> listEntitysValidos;
+    private ArrayList<Exportables> listEntitysInvalidos;
+    private ArrayList<ArrayList> UsuariosVyI;
 
     private Thread hiloExport, hiloImport;
 
@@ -282,24 +284,40 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         File f = StartfileChooser(this.FILE_CHOOSER_IMPORT);
         if (f != null) {
             jTextField1.setText(f.getPath());
-            ArrayList<ArrayList> importReportExcel = importReportExcel(f, selectEntity.getSelectedItem().toString());
-            if (importReportExcel != null) {
-                if (!(importReportExcel.get(0).isEmpty() & importReportExcel.get(1).isEmpty())) {
-                    listEntitysValidos = importReportExcel.get(0);
-                    listEntitysInvalidos = importReportExcel.get(1);
-                    llenarTabla(tbleObjectValidos, listEntitysValidos);
-                    llenarTabla(tbleObjectInvalidos, listEntitysInvalidos);
-                } else {//Si los dos Arrays estas vacios...
-                    listEntitysValidos.clear();
-                    listEntitysInvalidos.clear();
-                    ClearTable(tbleObjectValidos);
-                    ClearTable(tbleObjectInvalidos);
-                    JOptionPane.showMessageDialog(this, "El archivo no tiene informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
+            LoadingJDialog l = new LoadingJDialog(this, false);
+            l.setVisible(true);
+            setAlwaysOnTop(true);
+            this.setEnabled(false);
+            importReportExcel(l, new Callback() {
+
+                @Override
+                public void onComplete(ArrayList<ArrayList> a) {
+                    UsuariosVyI = a;
+                    JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
+                    setEnabled(true);
+                    setAlwaysOnTop(false);
+                    if (UsuariosVyI != null) {
+                        if (!(UsuariosVyI.get(0).isEmpty() & UsuariosVyI.get(1).isEmpty())) {
+                            listEntitysValidos = UsuariosVyI.get(0);
+                            listEntitysInvalidos = UsuariosVyI.get(1);
+                            llenarTabla(tbleObjectValidos, listEntitysValidos);
+                            llenarTabla(tbleObjectInvalidos, listEntitysInvalidos);
+                        } else {//Si los dos Arrays estas vacios...
+                            listEntitysValidos.clear();
+                            listEntitysInvalidos.clear();
+                            ClearTable(tbleObjectValidos);
+                            ClearTable(tbleObjectInvalidos);
+                            JOptionPane.showMessageDialog(null, "El archivo no tiene informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "El archivo no es accesible o no contiene ninguna hoja.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
                 }
-            }
-
+            }, selectEntity.getSelectedItem().toString(), f);
+        }else{
+            
         }
-
     }//GEN-LAST:event_SelectFileBtnMouseClicked
 
     private void SaveReportBtnAdmMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SaveReportBtnAdmMouseClicked
@@ -367,7 +385,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     private <T extends Exportables> void ExportReportExcel(File f, ArrayList<T> list) {//T Generico que obliga a que el parametro generico herede de la clase Exportables
         if (!list.isEmpty()) {
             OutputStream outFile;
-            try(XSSFWorkbook libro = new XSSFWorkbook()) {
+            try (XSSFWorkbook libro = new XSSFWorkbook()) {
                 outFile = new FileOutputStream(f);
 
                 XSSFCellStyle estiloTitulos = new estilo.BuilderCell()
@@ -427,123 +445,165 @@ public class LectorExcelIGU extends javax.swing.JFrame {
 
     }
 
-    private ArrayList<ArrayList> importReportExcel(File f, String ObjectName) {
+    private void importReportExcel(LoadingJDialog l, Callback callback, String ObjectName, File f) {
+        Thread a = new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        ArrayList<Object> ObjetosValidos = new ArrayList<>();
-        ArrayList<Object> ObjetosInvalidos = new ArrayList<>();
-        ArrayList<ArrayList> UsuariosVyI = new ArrayList<>(2);
-        ArrayList<Object> parametrosGenericos = new ArrayList<>();
-        try(Workbook wb = WorkbookFactory.create(f)) {
-            if (wb.getNumberOfSheets() > 0) {
+                ArrayList<Exportables> ObjetosValidos = new ArrayList<>();
+                ArrayList<Exportables> ObjetosInvalidos = new ArrayList<>();
+                ArrayList<ArrayList> UsuariosVyI = new ArrayList<>(2);
+                ArrayList<Object> parametrosGenericos = new ArrayList<>();
 
-                Sheet hoja = wb.getSheetAt(0);
-                boolean datoIncopatible = false;
-                int indexRenglon = 0, indexCelda = 0;
-                for (Row row : hoja) {
+                try (Workbook wb = WorkbookFactory.create(f)) {
+                    if (wb.getNumberOfSheets() > 0) {
+                        Sheet hoja = wb.getSheetAt(0);
+                        boolean datoIncopatible = false;
+                        int indexRenglon = 0, indexCelda = 0;
 
-                    if (indexRenglon > 0) {
-                        for (int cn = 0; cn < row.getLastCellNum(); cn++) {
-                            //System.out.println("Rows");
-                            Cell c = row.getCell(cn, MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                        l.setMaxValue(hoja.getLastRowNum());
+                        for (Row row : hoja) {
 
-                            switch (indexCelda) {
-                                case 0:
-                                    //Celda Id
-                                    if (c.getCellType() == CellType.NUMERIC) {
-                                        //idUser = (int) c.getNumericCellValue();
-                                        parametrosGenericos.add(0, (int) c.getNumericCellValue());
-                                        //System.out.println(idUser);
-                                    } else {
-                                        parametrosGenericos.add(0, -1);
-                                        //idUser = -1;
-                                        datoIncopatible = true;
+                            if (indexRenglon > 0) {
+                                for (int cn = 0; cn < row.getLastCellNum(); cn++) {
+                                    //System.out.println("Rows");
+                                    Cell c = row.getCell(cn, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+
+                                    switch (indexCelda) {
+                                        case 0:
+                                            //Celda Id
+                                            if (c.getCellType() == CellType.NUMERIC) {
+                                                //idUser = (int) c.getNumericCellValue();
+                                                parametrosGenericos.add(0, (int) c.getNumericCellValue());
+                                                //System.out.println(idUser);
+                                            } else {
+                                                parametrosGenericos.add(0, -1);
+                                                //idUser = -1;
+                                                datoIncopatible = true;
+                                            }
+                                            break;
+                                        case 1:
+                                            //Celda Nombre
+                                            if (c.getCellType() == CellType.STRING) {
+                                                //nombreUser = c.getStringCellValue();
+                                                parametrosGenericos.add(1, c.getStringCellValue());
+                                                //System.out.println(nombreUser);
+                                            } else {
+                                                //nombreUser = "*";
+                                                parametrosGenericos.add(1, "*");
+                                                datoIncopatible = true;
+                                            }
+                                            break;
+                                        case 2:
+                                            //Celda Apellido
+                                            if (c.getCellType() == CellType.STRING) {
+                                                //apellidoUser = c.getStringCellValue();
+                                                parametrosGenericos.add(2, c.getStringCellValue());
+                                                //System.out.println(apellidoUser);
+                                            } else {
+                                                parametrosGenericos.add(2, "*");
+                                                //apellidoUser = "*";
+                                                datoIncopatible = true;
+                                            }
+                                            break;
+                                        case 3:
+                                            //Celda Fecha
+                                            if (c.getCellType() == CellType.NUMERIC) {
+                                                if (ObjectName.equalsIgnoreCase("Users")) {
+                                                    parametrosGenericos.add(3, c.getLocalDateTimeCellValue().toLocalDate());
+                                                } else if (ObjectName.equalsIgnoreCase("Producto")) {
+                                                    parametrosGenericos.add(3, c.getNumericCellValue());
+                                                }
+                                            } else if (c.getCellType() == CellType.STRING) {
+                                                parametrosGenericos.add(3, c.getStringCellValue());
+                                            } else {
+                                                parametrosGenericos.add(3, null);
+                                                //localDateUser = null;
+                                                datoIncopatible = true;
+                                            }
+                                            break;
+                                        default:
+                                            parametrosGenericos.add(indexCelda, c.getStringCellValue());
+                                            break;
                                     }
-                                    break;
-                                case 1:
-                                    //Celda Nombre
-                                    if (c.getCellType() == CellType.STRING) {
-                                        //nombreUser = c.getStringCellValue();
-                                        parametrosGenericos.add(1, c.getStringCellValue());
-                                        //System.out.println(nombreUser);
+                                    indexCelda++;
+                                }
+                                if (ObjectName.equalsIgnoreCase("Users")) {
+                                    if (datoIncopatible) {
+                                        ObjetosInvalidos.add(new Users((int) parametrosGenericos.get(0),
+                                                (String) parametrosGenericos.get(1),
+                                                (String) parametrosGenericos.get(2),
+                                                (LocalDate) parametrosGenericos.get(3)));
                                     } else {
-                                        //nombreUser = "*";
-                                        parametrosGenericos.add(1, "*");
-                                        datoIncopatible = true;
+                                        ObjetosValidos.add(new Users((int) parametrosGenericos.get(0),
+                                                (String) parametrosGenericos.get(1),
+                                                (String) parametrosGenericos.get(2),
+                                                (LocalDate) parametrosGenericos.get(3)));
                                     }
-                                    break;
-                                case 2:
-                                    //Celda Apellido
-                                    if (c.getCellType() == CellType.STRING) {
-                                        //apellidoUser = c.getStringCellValue();
-                                        parametrosGenericos.add(2, c.getStringCellValue());
-                                        //System.out.println(apellidoUser);
+                                } else if (ObjectName.equalsIgnoreCase("Producto")) {
+                                    if (datoIncopatible) {
+                                        ObjetosInvalidos.add(new Producto((int) parametrosGenericos.get(0),
+                                                (String) parametrosGenericos.get(1),
+                                                (String) parametrosGenericos.get(2),
+                                                (Double) parametrosGenericos.get(3)));
                                     } else {
-                                        parametrosGenericos.add(2, "*");
-                                        //apellidoUser = "*";
-                                        datoIncopatible = true;
+                                        ObjetosValidos.add(new Producto((int) parametrosGenericos.get(0),
+                                                (String) parametrosGenericos.get(1),
+                                                (String) parametrosGenericos.get(2),
+                                                (Double) parametrosGenericos.get(3)));
                                     }
-                                    break;
-                                case 3:
-                                    //Celda Fecha
-                                    if (c.getCellType() == CellType.NUMERIC) {
-                                        if (ObjectName.equalsIgnoreCase("Users")) {
-                                            parametrosGenericos.add(3, c.getLocalDateTimeCellValue().toLocalDate());
-                                        } else if (ObjectName.equalsIgnoreCase("Producto")) {
-                                            parametrosGenericos.add(3, c.getNumericCellValue());
-                                        }
-                                    } else if (c.getCellType() == CellType.STRING) {
-                                        parametrosGenericos.add(3, c.getStringCellValue());
-                                    } else {
-                                        parametrosGenericos.add(3, null);
-                                        //localDateUser = null;
-                                        datoIncopatible = true;
-                                    }
-                                    break;
-                                default:
-                                    parametrosGenericos.add(indexCelda, c.getStringCellValue());
-                                    break;
+                                }
+
+                                datoIncopatible = false;
                             }
-                            indexCelda++;
+                            // Actualizar la GUI dentro de SwingUtilities.invokeLater()
+                            final int currentValue = indexRenglon;
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    l.setProgress(currentValue);
+                                    l.setStatus(" " + currentValue + " / " + l.getMaxValue());
+                                }
+                            });
+                            indexRenglon++;
+                            indexCelda = 0;
+
                         }
-                        if (ObjectName.equalsIgnoreCase("Users")) {
-                            if (datoIncopatible) {
-                                ObjetosInvalidos.add(new Users((int) parametrosGenericos.get(0),
-                                        (String) parametrosGenericos.get(1),
-                                        (String) parametrosGenericos.get(2),
-                                        (LocalDate) parametrosGenericos.get(3)));
-                            } else {
-                                ObjetosValidos.add(new Users((int) parametrosGenericos.get(0),
-                                        (String) parametrosGenericos.get(1),
-                                        (String) parametrosGenericos.get(2),
-                                        (LocalDate) parametrosGenericos.get(3)));
-                            }
-                        } else if (ObjectName.equalsIgnoreCase("Producto")) {
-                            if (datoIncopatible) {
-                                ObjetosInvalidos.add(new Producto((int) parametrosGenericos.get(0),
-                                        (String) parametrosGenericos.get(1),
-                                        (String) parametrosGenericos.get(2),
-                                        (Double) parametrosGenericos.get(3)));
-                            } else {
-                                ObjetosValidos.add(new Producto((int) parametrosGenericos.get(0),
-                                        (String) parametrosGenericos.get(1),
-                                        (String) parametrosGenericos.get(2),
-                                        (Double) parametrosGenericos.get(3)));
-                            }
+                        UsuariosVyI.add(ObjetosValidos);
+                        UsuariosVyI.add(ObjetosInvalidos);
+                        //wb.close();
+                        //return UsuariosVyI;
+                        // Tarea completada
+                        if (l.getMaxValue() == (indexRenglon - 1)) {
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    l.dispose(); // Cerrar el diálogo de carga
+                                }
+                            });
+                            callback.onComplete(UsuariosVyI);
                         }
-
-                        datoIncopatible = false;
+                    } else {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                l.dispose(); // Cerrar el diálogo de carga
+                            }
+                        });
+                        callback.onComplete(null);
                     }
-                    indexRenglon++;
-                    indexCelda = 0;
+                } catch (Exception ex) {
                 }
-                UsuariosVyI.add(ObjetosValidos);
-                UsuariosVyI.add(ObjetosInvalidos);
-                //wb.close();
-                return UsuariosVyI;
             }
-        } catch (Exception ex) {
         }
-        return null;
+        );
+        a.start();
+    }
+
+    // Interfaz de callback para manejar el resultado de AccionPesada
+    private interface Callback {
+
+        void onComplete(ArrayList<ArrayList> a);
     }
 
     private void setUIM(String ClassNameUI) {

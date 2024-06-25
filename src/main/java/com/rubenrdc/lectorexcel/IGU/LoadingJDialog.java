@@ -79,11 +79,16 @@ public class LoadingJDialog extends javax.swing.JDialog {
     public void setProgress(int progress) {
         loadP.setValue(progress);
     }
-
     public void setStatus(String status) {
         OpRealizadas.setText(status);
     }
-
+    public void setMaxValue(int i){
+        loadP.setMaximum(i);
+    }
+    public int getMaxValue(){
+        return loadP.getMaximum();
+    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel OpRealizadas;
