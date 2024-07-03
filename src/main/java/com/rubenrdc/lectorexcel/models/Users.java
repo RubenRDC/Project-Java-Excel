@@ -2,7 +2,6 @@ package com.rubenrdc.lectorexcel.models;
 
 import com.rubenrdc.lectorexcel.models.interfaces.Exportables;
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 /**
  *
@@ -56,23 +55,25 @@ public class Users implements Exportables {
     public LocalDate getFechaDeIngreso() {
         return fechaDeIngreso;
     }
-
+    
+    public void setFechaDeIngreso(LocalDate f){
+        this.fechaDeIngreso=f;
+    }
+    
     @Override
     public Object[] getRow() {
-        row = new Object[4];
-        row[0]=ID;
-        row[1]=Nombre;
-        row[2]=Apellido;
-        row[3]=fechaDeIngreso;
+        row = new Object[3];
+        row[0]=Nombre;
+        row[1]=Apellido;
+        row[2]=fechaDeIngreso;
         return row;
     }
     @Override
     public String[] getTitulosAtributos() {
-        RowAtributos = new String[4];
-        RowAtributos[0]="ID";
-        RowAtributos[1]="Nombre";
-        RowAtributos[2]="Apellidos";
-        RowAtributos[3]="Fecha De Ingreso";
+        RowAtributos = new String[3];
+        RowAtributos[0]="Nombre";
+        RowAtributos[1]="Apellidos";
+        RowAtributos[2]="Fecha De Ingreso";
         return RowAtributos;
     }
     

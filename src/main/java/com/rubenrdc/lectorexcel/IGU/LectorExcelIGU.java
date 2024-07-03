@@ -1,6 +1,6 @@
 package com.rubenrdc.lectorexcel.IGU;
 
-import com.rubenrdc.lectorexcel.estilos.estilo;
+import com.rubenrdc.lectorexcel.estilos.Estilo;
 import com.rubenrdc.lectorexcel.models.Producto;
 import com.rubenrdc.lectorexcel.models.Users;
 import com.rubenrdc.lectorexcel.models.interfaces.Exportables;
@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -25,7 +26,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -42,11 +42,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class LectorExcelIGU extends javax.swing.JFrame {
 
     private JFileChooser fileChooser;
-    //private Workbook libro;
     private final int FILE_CHOOSER_EXPORT = 0, FILE_CHOOSER_IMPORT = 1;
-    private ArrayList<Exportables> listEntitysValidos;
-    private ArrayList<Exportables> listEntitysInvalidos;
-    private ArrayList<ArrayList> UsuariosVyI;
+    private List<Exportables> listEntitysValidos;
+    private List<Exportables> listEntitysInvalidos;
+    private List<List> UsuariosVyI;
 
     public LectorExcelIGU() {
         this.setResizable(false);
@@ -71,6 +70,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         selectEntity = new javax.swing.JComboBox<>();
+        getListExpEntityBtn = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tbleObjectInvalidos = new javax.swing.JTable();
@@ -117,11 +117,11 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addComponent(ImportBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
                 .addComponent(SaveReportBtnAdm, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -129,7 +129,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(SaveReportBtnAdm)
@@ -145,7 +145,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         });
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel1.setText("Archivo Seleccionado:");
+        jLabel1.setText("Archivo Seleccionado Para Importar:");
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -154,7 +154,14 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel6.setText("Tipo de Entidad:");
 
-        selectEntity.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Users", "Producto" }));
+        selectEntity.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Users", "Productos" }));
+
+        getListExpEntityBtn.setText("Obtener Registros Para Exportar");
+        getListExpEntityBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                getListExpEntityBtnMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -172,7 +179,10 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(selectEntity, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(selectEntity, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(getListExpEntityBtn)))))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -188,7 +198,9 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                     .addComponent(selectEntity, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
                     .addComponent(jTextField1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(SelectFileBtn)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(SelectFileBtn)
+                    .addComponent(getListExpEntityBtn))
                 .addContainerGap())
         );
 
@@ -246,8 +258,8 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -258,10 +270,10 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE))
+                .addGap(0, 0, 0))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -289,7 +301,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             importReportExcel(l, new Callback() {
 
                 @Override
-                public void onComplete(ArrayList<ArrayList> a) {
+                public void onComplete(List<List> a) {
                     UsuariosVyI = a;
                     if (UsuariosVyI != null) {
                         if (!(UsuariosVyI.get(0).isEmpty() & UsuariosVyI.get(1).isEmpty())) {
@@ -299,21 +311,23 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                             llenarTabla(tbleObjectValidos, listEntitysValidos);
                             llenarTabla(tbleObjectInvalidos, listEntitysInvalidos);
                         } else {//Si los dos Arrays estas vacios...
-                            JOptionPane.showMessageDialog(null, "El archivo no tiene informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(l, "El archivo no tiene informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
                             listEntitysValidos.clear();
                             listEntitysInvalidos.clear();
                             ClearTable(tbleObjectValidos);
                             ClearTable(tbleObjectInvalidos);
                         }
                     } else {
-                        JOptionPane.showMessageDialog(null, "El archivo no es accesible o no contiene ninguna hoja.", "Error", JOptionPane.ERROR_MESSAGE);
+                        System.out.println(listEntitysValidos);
+                        System.out.println(listEntitysInvalidos);
+                        JOptionPane.showMessageDialog(l, "El archivo no es accesible o no contiene ninguna hoja.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
+                    //System.out.println("opahsjfpoahf");
+                    l.dispose();
                     setEnabled(true);
                     setAlwaysOnTop(false);
                 }
             }, selectEntity.getSelectedItem().toString(), f);
-        } else {
-
         }
     }//GEN-LAST:event_SelectFileBtnMouseClicked
 
@@ -328,7 +342,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             this.setEnabled(false);
 
             ExportReportExcel(l, new Callback() {
-                public void onComplete(ArrayList<ArrayList> a) {
+                public void onComplete(List<List> a) {
                     JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
                     setEnabled(true);
                     setAlwaysOnTop(false);
@@ -347,7 +361,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             this.setEnabled(false);
 
             ExportReportExcel(l, new Callback() {
-                public void onComplete(ArrayList<ArrayList> a) {
+                public void onComplete(List<List> a) {
                     JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
                     setEnabled(true);
                     setAlwaysOnTop(false);
@@ -357,8 +371,12 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     }//GEN-LAST:event_SaveReportBtnNoAdmMouseClicked
 
     private void ImportBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ImportBtnMouseClicked
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_ImportBtnMouseClicked
+
+    private void getListExpEntityBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_getListExpEntityBtnMouseClicked
+
+    }//GEN-LAST:event_getListExpEntityBtnMouseClicked
 
     private File StartfileChooser(int mode) {
         setUIM(UIManager.getSystemLookAndFeelClassName());
@@ -401,7 +419,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     }
 
     //private void ExportReportExcel(File f, ArrayList<? extends Exportables> list)//ArrayList de tipo generico q esta obligado a que herede de la clase Exportables
-    private <T extends Exportables> void ExportReportExcel(LoadingJDialog l, Callback callback, File f, ArrayList<T> list) {//T Generico que obliga a que el parametro generico herede de la clase Exportables
+    private <T extends Exportables> void ExportReportExcel(LoadingJDialog l, Callback callback, File f, List<T> list) {//T Generico que obliga a que el parametro generico herede de la clase Exportables
         Thread tr = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -411,13 +429,13 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                     try (XSSFWorkbook libro = new XSSFWorkbook()) {
                         outFile = new FileOutputStream(f);
 
-                        XSSFCellStyle estiloTitulos = new estilo.BuilderCell()
+                        XSSFCellStyle estiloTitulos = new Estilo.BuilderCell()
                                 .setBoldText(true)
                                 .setColorText("FFFFFF")
                                 .setColorFondoHEX("")
                                 .setTipoDeRellenoFondo(FillPatternType.SOLID_FOREGROUND)
                                 .contruirEstilo(libro);
-                        XSSFCellStyle estiloFecha = new estilo.BuilderCell().setFontFormat("dd/MM/yyyy").contruirEstilo(libro);
+                        XSSFCellStyle estiloFecha = new Estilo.BuilderCell().setFontFormat("dd/MM/yyyy").contruirEstilo(libro);
                         XSSFSheet createSheet = libro.createSheet();
 
                         int indexRenglon = 0;
@@ -433,7 +451,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                                 } else {
                                     //Obtengo un elemento del array de atributos de la clase de usuarios en la clase generica.
                                     Object a = list.get((i - 1)).getRow()[j];
-                                    if (a instanceof String aa) {//Consulta si a es una instancia de String, si es asi lo cartea como aa
+                                    if (a instanceof String aa) {//Consulta si a checkTypeCell una instancia de String, si checkTypeCell asi lo cartea como aa
                                         createCell.setCellValue(aa);
                                     } else if (a instanceof Double double1) {
                                         createCell.setCellValue(double1);
@@ -478,9 +496,9 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                         }
 
                     } catch (FileNotFoundException ex) {
-                        System.out.println(ex);
+                        ex.printStackTrace();
                     } catch (IOException ex) {
-                        System.out.println(ex);
+                        ex.printStackTrace();
                     }
 
                 } else {
@@ -494,152 +512,136 @@ public class LectorExcelIGU extends javax.swing.JFrame {
 
     private void importReportExcel(LoadingJDialog l, Callback callback, String ObjectName, File f) {
         Thread a = new Thread(new Runnable() {
+            List<Object> parametrosGenericos;
+            boolean finalizado = false;
+            int datosIncompatibles = 0;
+
             @Override
             public void run() {
 
-                ArrayList<Exportables> ObjetosValidos = new ArrayList<>();
-                ArrayList<Exportables> ObjetosInvalidos = new ArrayList<>();
-                ArrayList<ArrayList> UsuariosVyI = new ArrayList<>(2);
-                ArrayList<Object> parametrosGenericos = new ArrayList<>();
+                List<Exportables> ObjetosValidos = new ArrayList<>();
+                List<Exportables> ObjetosInvalidos = new ArrayList<>();
+                List<List> UsuariosVyI = new ArrayList<>(2);
+                parametrosGenericos = new ArrayList<>();
 
                 try (Workbook wb = WorkbookFactory.create(f)) {
-                    if (wb.getNumberOfSheets() > 0) {
-                        Sheet hoja = wb.getSheetAt(0);
-                        boolean datoIncopatible = false;
-                        int indexRenglon = 0, indexCelda = 0;
+                    Sheet hoja = wb.getSheetAt(0);
+                    int indexRenglon = 0, indexCelda = 0;
+                    int cantRows = hoja.getLastRowNum();
+                    l.setMaxValue(cantRows);
+                    for (Row row : hoja) {
 
-                        l.setMaxValue(hoja.getLastRowNum());
-                        for (Row row : hoja) {
+                        if (indexRenglon < cantRows && row.getRowNum() != 0) {
+                            for (int cn = 0; cn < row.getLastCellNum(); cn++) {
+                                Cell c = row.getCell(cn, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 
-                            if (indexRenglon > 0) {
-                                for (int cn = 0; cn < row.getLastCellNum(); cn++) {
-                                    //System.out.println("Rows");
-                                    Cell c = row.getCell(cn, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-
-                                    switch (indexCelda) {
-                                        case 0:
-                                            //Celda Id
-                                            if (c.getCellType() == CellType.NUMERIC) {
-                                                //idUser = (int) c.getNumericCellValue();
-                                                parametrosGenericos.add(0, (int) c.getNumericCellValue());
-                                                //System.out.println(idUser);
-                                            } else {
-                                                parametrosGenericos.add(0, -1);
-                                                //idUser = -1;
-                                                datoIncopatible = true;
-                                            }
-                                            break;
-                                        case 1:
-                                            //Celda Nombre
-                                            if (c.getCellType() == CellType.STRING) {
-                                                //nombreUser = c.getStringCellValue();
-                                                parametrosGenericos.add(1, c.getStringCellValue());
-                                                //System.out.println(nombreUser);
-                                            } else {
-                                                //nombreUser = "*";
-                                                parametrosGenericos.add(1, "*");
-                                                datoIncopatible = true;
-                                            }
-                                            break;
-                                        case 2:
-                                            //Celda Apellido
-                                            if (c.getCellType() == CellType.STRING) {
-                                                //apellidoUser = c.getStringCellValue();
-                                                parametrosGenericos.add(2, c.getStringCellValue());
-                                                //System.out.println(apellidoUser);
-                                            } else {
-                                                parametrosGenericos.add(2, "*");
-                                                //apellidoUser = "*";
-                                                datoIncopatible = true;
-                                            }
-                                            break;
-                                        case 3:
-                                            //Celda Fecha
-                                            if (c.getCellType() == CellType.NUMERIC) {
-                                                if (ObjectName.equalsIgnoreCase("Users")) {
-                                                    parametrosGenericos.add(3, c.getLocalDateTimeCellValue().toLocalDate());
-                                                } else if (ObjectName.equalsIgnoreCase("Producto")) {
-                                                    parametrosGenericos.add(3, c.getNumericCellValue());
-                                                }
-                                            } else if (c.getCellType() == CellType.STRING) {
-                                                parametrosGenericos.add(3, c.getStringCellValue());
-                                            } else {
-                                                parametrosGenericos.add(3, null);
-                                                //localDateUser = null;
-                                                datoIncopatible = true;
-                                            }
-                                            break;
-                                        default:
-                                            parametrosGenericos.add(indexCelda, c.getStringCellValue());
-                                            break;
+                                switch (indexCelda) {
+                                    case 0 -> {
+                                        checkTypeCell(c, CellType.STRING);
                                     }
-                                    indexCelda++;
-                                }
-                                if (ObjectName.equalsIgnoreCase("Users")) {
-                                    if (datoIncopatible) {
-                                        ObjetosInvalidos.add(new Users((int) parametrosGenericos.get(0),
-                                                (String) parametrosGenericos.get(1),
-                                                (String) parametrosGenericos.get(2),
-                                                (LocalDate) parametrosGenericos.get(3)));
-                                    } else {
-                                        ObjetosValidos.add(new Users((int) parametrosGenericos.get(0),
-                                                (String) parametrosGenericos.get(1),
-                                                (String) parametrosGenericos.get(2),
-                                                (LocalDate) parametrosGenericos.get(3)));
+                                    case 1 -> {
+                                        checkTypeCell(c, CellType.STRING);
                                     }
-                                } else if (ObjectName.equalsIgnoreCase("Producto")) {
-                                    if (datoIncopatible) {
-                                        ObjetosInvalidos.add(new Producto((int) parametrosGenericos.get(0),
-                                                (String) parametrosGenericos.get(1),
-                                                (String) parametrosGenericos.get(2),
-                                                (Double) parametrosGenericos.get(3)));
-                                    } else {
-                                        ObjetosValidos.add(new Producto((int) parametrosGenericos.get(0),
-                                                (String) parametrosGenericos.get(1),
-                                                (String) parametrosGenericos.get(2),
-                                                (Double) parametrosGenericos.get(3)));
+                                    case 2 -> {
+                                        if (ObjectName.equalsIgnoreCase("Users")) {
+                                            checkTypeCell(c, CellType.NUMERIC);//LocalDate
+                                        } else {
+                                            checkTypeCell(c, CellType.STRING);
+                                        }
+                                    }
+                                    case 3 -> {
+                                        checkTypeCell(c, CellType.NUMERIC);
+                                    }
+                                    default -> {
+                                        checkTypeCell(c, CellType.STRING);
                                     }
                                 }
-
-                                datoIncopatible = false;
+                                indexCelda++;
                             }
-                            // Actualizar la GUI dentro de SwingUtilities.invokeLater()
-                            final int currentValue = indexRenglon;
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    l.setProgress(currentValue);
-                                    l.setStatus(" " + currentValue + " / " + l.getMaxValue());
+                            if (ObjectName.equalsIgnoreCase("Users")) {
+                                if (datosIncompatibles > 0) {
+                                    ObjetosInvalidos.add(new Users(
+                                            (String) parametrosGenericos.get(0),
+                                            (String) parametrosGenericos.get(1),
+                                            (LocalDate) parametrosGenericos.get(2)));
+                                } else {
+                                    ObjetosValidos.add(new Users((String) parametrosGenericos.get(0),
+                                            (String) parametrosGenericos.get(1),
+                                            (LocalDate) parametrosGenericos.get(2)));
                                 }
-                            });
+                            } else if (ObjectName.equalsIgnoreCase("Productos")) {
+                                if (datosIncompatibles > 0) {
+                                    ObjetosInvalidos.add(new Producto((String) parametrosGenericos.get(0),
+                                            (String) parametrosGenericos.get(1),
+                                            (String) parametrosGenericos.get(2),
+                                            (Double) parametrosGenericos.get(3)));
+                                } else {
+                                    ObjetosValidos.add(new Producto((String) parametrosGenericos.get(0),
+                                            (String) parametrosGenericos.get(1),
+                                            (String) parametrosGenericos.get(2),
+                                            (Double) parametrosGenericos.get(3)));
+                                }
+                            }
+                            parametrosGenericos.clear();
                             indexRenglon++;
-                            indexCelda = 0;
 
                         }
-                        UsuariosVyI.add(ObjetosValidos);
-                        UsuariosVyI.add(ObjetosInvalidos);
-                        //wb.close();
-                        //return UsuariosVyI;
-                        // Tarea completada
-                        if (l.getMaxValue() == (indexRenglon - 1)) {
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    l.dispose(); // Cerrar el diálogo de carga
-                                }
-                            });
-                            callback.onComplete(UsuariosVyI);
-                        }
-                    } else {
+                        //System.out.println(indexRenglon);
+                        // Actualizar la GUI dentro de SwingUtilities.invokeLater()
+                        final int currentValue = indexRenglon;
                         SwingUtilities.invokeLater(new Runnable() {
                             @Override
                             public void run() {
-                                l.dispose(); // Cerrar el diálogo de carga
+                                l.setProgress(currentValue);
+                                l.setStatus(" " + currentValue + " / " + l.getMaxValue());
                             }
                         });
-                        callback.onComplete(null);
+                        datosIncompatibles = 0;
+                        indexCelda = 0;
+
+                    }
+                    UsuariosVyI.add(ObjetosValidos);
+                    UsuariosVyI.add(ObjetosInvalidos);
+                    // Tarea completada
+                    if (l.getMaxValue() == (indexRenglon)) {
+                        finalizado = true;
+                        callback.onComplete(UsuariosVyI);
                     }
                 } catch (Exception ex) {
+                    ex.printStackTrace();
+                    if (!finalizado) {
+                        callback.onComplete(null);
+                    }
+
+                }
+
+            }
+
+            public void checkTypeCell(Cell c, CellType Type) {
+                if (Type == CellType.STRING) {
+                    if (c.getCellType() == Type) {
+                        parametrosGenericos.add(c.getStringCellValue());
+                    } else {
+                        parametrosGenericos.add("*");
+                        datosIncompatibles++;
+                    }
+                } else if (Type == CellType.NUMERIC) {
+                    if (ObjectName.equalsIgnoreCase("Users")) {
+                        if (c.getCellType() == Type) {
+                            parametrosGenericos.add(c.getLocalDateTimeCellValue().toLocalDate());
+                        } else {
+                            parametrosGenericos.add(LocalDate.of(0, 1, 1));
+                            datosIncompatibles++;
+                        }
+                    } else {
+                        if (c.getCellType() == Type) {
+                            parametrosGenericos.add(c.getNumericCellValue());
+                        } else {
+                            parametrosGenericos.add(0.0);
+                            datosIncompatibles++;
+                        }
+                    }
+
                 }
             }
         }
@@ -647,10 +649,10 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         a.start();
     }
 
-    // Interfaz de callback para manejar el resultado de AccionPesada
+// Interfaz de callback para manejar el resultado de AccionPesada
     private interface Callback {
 
-        void onComplete(ArrayList<ArrayList> a);
+        void onComplete(List<List> a);
     }
 
     private void setUIM(String ClassNameUI) {
@@ -663,19 +665,23 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         }
     }
 
-    private <T extends Exportables> void llenarTabla(javax.swing.JTable tb, ArrayList<T> list) {
+    private <T extends Exportables> void llenarTabla(javax.swing.JTable tb, List<T> list) {
         ClearTable(tb);
-        if (!list.isEmpty()) {
-            javax.swing.table.DefaultTableModel dm = (javax.swing.table.DefaultTableModel) (tb.getModel());
-            for (String titulosAtributo : list.get(0).getTitulosAtributos()) {
-                dm.addColumn(titulosAtributo);
+        //int registros = 0;
+        if (list != null) {
+            if (!list.isEmpty()) {
+                javax.swing.table.DefaultTableModel dm = (javax.swing.table.DefaultTableModel) (tb.getModel());
+                for (String titulosAtributo : list.get(0).getTitulosAtributos()) {
+                    dm.addColumn(titulosAtributo);
+                }
+                for (int j = 0; j < list.size(); j++) {
+                    dm.addRow(list.get(j).getRow());
+                    //registros++;
+                }
+                tb.setModel(dm);
             }
-            for (int j = 0; j < list.size(); j++) {
-                dm.addRow(list.get(j).getRow());
-            }
-            tb.setModel(dm);
+            //JOptionPane.showMessageDialog(this, registros + " registros cargador en la tabla.", "Atencion!", JOptionPane.INFORMATION_MESSAGE);
         }
-        
     }
 
     public void ClearTable(javax.swing.JTable jTable) {
@@ -685,11 +691,13 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         jTable.setModel(dm);
     }
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ImportBtn;
     private javax.swing.JButton SaveReportBtnAdm;
     private javax.swing.JButton SaveReportBtnNoAdm;
     private javax.swing.JButton SelectFileBtn;
+    private javax.swing.JButton getListExpEntityBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
