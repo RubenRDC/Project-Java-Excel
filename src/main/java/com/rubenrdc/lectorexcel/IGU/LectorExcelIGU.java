@@ -3,10 +3,13 @@ package com.rubenrdc.lectorexcel.IGU;
 import com.rubenrdc.lectorexcel.estilos.Estilo;
 import com.rubenrdc.lectorexcel.models.Producto;
 import com.rubenrdc.lectorexcel.models.Users;
+import com.rubenrdc.lectorexcel.models.dao.ProductoDao;
+import com.rubenrdc.lectorexcel.models.dao.UsersDao;
 import com.rubenrdc.lectorexcel.models.interfaces.Exportables;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
@@ -14,8 +17,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -89,10 +90,15 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             new String [] {
 
             }
-        ));
+        ){
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return false;
+            }
+        });
         tbleObjectValidos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_NEXT_COLUMN);
         tbleObjectValidos.setFocusable(false);
         tbleObjectValidos.setRowHeight(25);
+        tbleObjectValidos.setRowSelectionAllowed(false);
         tbleObjectValidos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(tbleObjectValidos);
 
@@ -155,6 +161,11 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         jLabel6.setText("Tipo de Entidad:");
 
         selectEntity.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Users", "Productos" }));
+        selectEntity.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                selectEntityItemStateChanged(evt);
+            }
+        });
 
         getListExpEntityBtn.setText("Obtener Registros Para Exportar");
         getListExpEntityBtn.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -214,10 +225,15 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             new String [] {
 
             }
-        ));
+        ){
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return false;
+            }
+        });
         tbleObjectInvalidos.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_NEXT_COLUMN);
         tbleObjectInvalidos.setFocusable(false);
         tbleObjectInvalidos.setRowHeight(25);
+        tbleObjectInvalidos.setRowSelectionAllowed(false);
         tbleObjectInvalidos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane2.setViewportView(tbleObjectInvalidos);
 
@@ -298,7 +314,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             l.setVisible(true);
             setAlwaysOnTop(true);
             this.setEnabled(false);
-            importReportExcel(l, new Callback() {
+            importReportExcel(l, new CallbackImpExp() {
 
                 @Override
                 public void onComplete(List<List> a) {
@@ -312,17 +328,11 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                             llenarTabla(tbleObjectInvalidos, listEntitysInvalidos);
                         } else {//Si los dos Arrays estas vacios...
                             JOptionPane.showMessageDialog(l, "El archivo no tiene informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
-                            listEntitysValidos.clear();
-                            listEntitysInvalidos.clear();
-                            ClearTable(tbleObjectValidos);
-                            ClearTable(tbleObjectInvalidos);
+                            clearReg();
                         }
                     } else {
-                        System.out.println(listEntitysValidos);
-                        System.out.println(listEntitysInvalidos);
                         JOptionPane.showMessageDialog(l, "El archivo no es accesible o no contiene ninguna hoja.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
-                    //System.out.println("opahsjfpoahf");
                     l.dispose();
                     setEnabled(true);
                     setAlwaysOnTop(false);
@@ -332,51 +342,108 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     }//GEN-LAST:event_SelectFileBtnMouseClicked
 
     private void SaveReportBtnAdmMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SaveReportBtnAdmMouseClicked
-        //StartfileChooser(this.FILE_CHOOSER_EXPORT);
-        File f = StartfileChooser(this.FILE_CHOOSER_EXPORT);
+        if (listEntitysValidos != null) {
+            if (!listEntitysValidos.isEmpty()) {
+                File f = StartfileChooser(this.FILE_CHOOSER_EXPORT);
 
-        if (f != null) {
-            LoadingJDialog l = new LoadingJDialog(this, false);
-            l.setVisible(true);
-            setAlwaysOnTop(true);
-            this.setEnabled(false);
+                if (f != null) {
+                    LoadingJDialog l = new LoadingJDialog(this, false);
+                    l.setVisible(true);
+                    setAlwaysOnTop(true);
+                    this.setEnabled(false);
 
-            ExportReportExcel(l, new Callback() {
-                public void onComplete(List<List> a) {
-                    JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
-                    setEnabled(true);
-                    setAlwaysOnTop(false);
+                    ExportReportExcel(l, new CallbackImpExp() {
+                        public void onComplete(List<List> a) {
+                            JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
+                            setEnabled(true);
+                            setAlwaysOnTop(false);
+                        }
+                    }, f, listEntitysValidos);
                 }
-            }, f, listEntitysValidos);
+            }
         }
     }//GEN-LAST:event_SaveReportBtnAdmMouseClicked
 
     private void SaveReportBtnNoAdmMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SaveReportBtnNoAdmMouseClicked
-        File f = StartfileChooser(this.FILE_CHOOSER_EXPORT);
+        if (listEntitysInvalidos != null) {
+            if (!listEntitysInvalidos.isEmpty()) {
+                File f = StartfileChooser(this.FILE_CHOOSER_EXPORT);
 
-        if (f != null) {
-            LoadingJDialog l = new LoadingJDialog(this, false);
-            l.setVisible(true);
-            setAlwaysOnTop(true);
-            this.setEnabled(false);
+                if (f != null) {
+                    LoadingJDialog l = new LoadingJDialog(this, false);
+                    l.setVisible(true);
+                    setAlwaysOnTop(true);
+                    this.setEnabled(false);
 
-            ExportReportExcel(l, new Callback() {
-                public void onComplete(List<List> a) {
-                    JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
-                    setEnabled(true);
-                    setAlwaysOnTop(false);
+                    ExportReportExcel(l, new CallbackImpExp() {
+                        public void onComplete(List<List> a) {
+                            JOptionPane.showMessageDialog(l, "Operacion realizada con exito.", "Exito!", JOptionPane.INFORMATION_MESSAGE);
+                            setEnabled(true);
+                            setAlwaysOnTop(false);
+                        }
+                    }, f, listEntitysInvalidos);
                 }
-            }, f, listEntitysInvalidos);
+            }
         }
     }//GEN-LAST:event_SaveReportBtnNoAdmMouseClicked
 
     private void ImportBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ImportBtnMouseClicked
+        if (listEntitysValidos != null) {
+            if (!listEntitysValidos.isEmpty()) {
+                LoadingJDialog loadingJDialog = new LoadingJDialog(this, false);
+                loadingJDialog.setVisible(true);
+                setAlwaysOnTop(true);
+                this.setEnabled(false);
 
+                if (listEntitysValidos.get(0) instanceof Users) {
+                    addUsersList(loadingJDialog, listEntitysValidos, new CallbackInserts() {
+                        @Override
+                        public void onComplete(int rowsAffected, String log) {
+                            JOptionPane.showMessageDialog(loadingJDialog, "Los campos agregados exitosamente fueron " + rowsAffected + ".", "Operacion Realizada", JOptionPane.INFORMATION_MESSAGE);
+                            loadingJDialog.dispose();
+                            setEnabled(true);
+                            setAlwaysOnTop(false);
+                            if (listEntitysValidos.size() > rowsAffected) {
+                                generarLog(log);
+                            }
+                        }
+                    });
+                } else if (listEntitysValidos.get(0) instanceof Producto) {
+                    addProductList(loadingJDialog, listEntitysValidos, new CallbackInserts() {
+                        @Override
+                        public void onComplete(int rowsAffected, String log) {
+                            JOptionPane.showMessageDialog(loadingJDialog, "Los campos agregados exitosamente fueron " + rowsAffected + ".", "Operacion Realizada", JOptionPane.INFORMATION_MESSAGE);
+                            loadingJDialog.dispose();
+                            setEnabled(true);
+                            setAlwaysOnTop(false);
+                            if (listEntitysValidos.size() > rowsAffected) {
+                                generarLog(log);
+                            }
+                        }
+                    });
+                }
+            }
+        }
     }//GEN-LAST:event_ImportBtnMouseClicked
 
     private void getListExpEntityBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_getListExpEntityBtnMouseClicked
+        clearReg();
+        if (selectEntity.getSelectedItem().toString().equalsIgnoreCase("Users")) {
+            listEntitysValidos = UsersDao.getAllUsersListInExport();
+            llenarTabla(tbleObjectValidos, listEntitysValidos);
+        } else if (selectEntity.getSelectedItem().toString().equalsIgnoreCase("Productos")) {
+            listEntitysValidos = ProductoDao.getAllProductListInExport();
+            llenarTabla(tbleObjectValidos, listEntitysValidos);
+        }
 
     }//GEN-LAST:event_getListExpEntityBtnMouseClicked
+
+    private void selectEntityItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_selectEntityItemStateChanged
+        //Cada vez q se selecciona una opcion diferente se detecta en el if
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+            clearReg();
+        }
+    }//GEN-LAST:event_selectEntityItemStateChanged
 
     private File StartfileChooser(int mode) {
         setUIM(UIManager.getSystemLookAndFeelClassName());
@@ -419,7 +486,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     }
 
     //private void ExportReportExcel(File f, ArrayList<? extends Exportables> list)//ArrayList de tipo generico q esta obligado a que herede de la clase Exportables
-    private <T extends Exportables> void ExportReportExcel(LoadingJDialog l, Callback callback, File f, List<T> list) {//T Generico que obliga a que el parametro generico herede de la clase Exportables
+    private <T extends Exportables> void ExportReportExcel(LoadingJDialog l, CallbackImpExp callback, File f, List<T> list) {//T Generico que obliga a que el parametro generico herede de la clase Exportables
         Thread tr = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -468,7 +535,6 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                                     }
                                 }
                                 createSheet.autoSizeColumn(j);
-
                             }
 
                             // Actualizar la GUI dentro de SwingUtilities.invokeLater()
@@ -510,7 +576,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
 
     }
 
-    private void importReportExcel(LoadingJDialog l, Callback callback, String ObjectName, File f) {
+    private void importReportExcel(LoadingJDialog l, CallbackImpExp callback, String ObjectName, File f) {
         Thread a = new Thread(new Runnable() {
             List<Object> parametrosGenericos;
             boolean finalizado = false;
@@ -649,19 +715,97 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         a.start();
     }
 
-// Interfaz de callback para manejar el resultado de AccionPesada
-    private interface Callback {
+    public void addProductList(LoadingJDialog loadingJDialog, List<Exportables> listProducts, CallbackInserts callback) {
 
-        void onComplete(List<List> a);
+        Thread a = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                loadingJDialog.setMaxValue(listProducts.size());
+                int rowsAffected = 0, indexRenglon = 0;
+                String log = "", localDate;
+                Producto product;
+                for (Exportables Product : listProducts) {
+                    product = (Producto) Product;
+                    if (ProductoDao.addProduct(product)) {
+                        rowsAffected++;
+                    } else {
+                        localDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss"));
+                        log += localDate + " : " + product.getCodigo() + " : not inserted into the database in duplicate. \n";
+                    }
+                    indexRenglon++;
+                    final int currentValue = indexRenglon;
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadingJDialog.setProgress(currentValue);
+                            loadingJDialog.setStatus(" " + currentValue + " / " + loadingJDialog.getMaxValue());
+                        }
+                    });
+                }
+                if (loadingJDialog.getMaxValue() == (indexRenglon)) {
+                    callback.onComplete(rowsAffected, log);
+                }
+            }
+        });
+        a.start();
     }
 
-    private void setUIM(String ClassNameUI) {
-        try {
-            UIManager.setLookAndFeel(ClassNameUI);
+    public void addUsersList(LoadingJDialog loadingJDialog, List<Exportables> listUsers, CallbackInserts callback) {
 
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(LectorExcelIGU.class
-                    .getName()).log(Level.SEVERE, null, ex);
+        Thread a = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                loadingJDialog.setMaxValue(listUsers.size());
+                int rowsAffected = 0, indexRenglon = 0;
+                String log = "", localDate;
+                Users User;
+                for (Exportables listUser : listUsers) {
+                    User = (Users) listUser;
+                    if (UsersDao.addUser(User)) {
+                        rowsAffected++;
+                    } else {
+                        localDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH.mm.ss"));
+                        log += localDate + " : " + User.getNombre() + " " + User.getApellido() + " " + User.getFechaDeIngreso() + " : not inserted into the database in duplicate.\n";
+                    }
+                    indexRenglon++;
+                    final int currentValue = indexRenglon;
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadingJDialog.setProgress(currentValue);
+                            loadingJDialog.setStatus(" " + currentValue + " / " + loadingJDialog.getMaxValue());
+                        }
+                    });
+                }
+                if (loadingJDialog.getMaxValue() == (indexRenglon)) {
+                    callback.onComplete(rowsAffected, log);
+                }
+            }
+        });
+        a.start();
+    }
+
+    private void generarLog(String log) {
+        final String l = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss"));
+
+        final String userDirectoryPath = System.getProperty("user.dir");
+        final String PathLog = userDirectoryPath + "/log";
+        final String Path = PathLog + "/" + l + "log.txt";
+        File file = new File(PathLog);
+        File logFile = new File(Path);
+        try {
+            if (!file.exists()) {
+                file.mkdir();
+                if (!logFile.exists()) {
+                    logFile.createNewFile();
+                }
+            }
+            System.out.println(log);
+            FileWriter flw = new FileWriter(logFile);
+            flw.write(log);
+            flw.close();
+        } catch (IOException ex) {
+            //System.out.println(ex);
         }
     }
 
@@ -691,6 +835,31 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         jTable.setModel(dm);
     }
 
+    private void clearReg() {
+        listEntitysValidos = null;
+        listEntitysInvalidos = null;
+        ClearTable(tbleObjectValidos);
+        ClearTable(tbleObjectInvalidos);
+    }
+
+    // Interfaz de callback para manejar el resultado de AccionPesada
+    private interface CallbackImpExp {
+
+        void onComplete(List<List> a);
+    }
+
+    private interface CallbackInserts {
+
+        void onComplete(int rowsAffected, String log);
+    }
+
+    private void setUIM(String ClassNameUI) {
+        try {
+            UIManager.setLookAndFeel(ClassNameUI);
+
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ImportBtn;

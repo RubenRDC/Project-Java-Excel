@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 /**
@@ -15,7 +16,7 @@ import javax.swing.JOptionPane;
 public class DaoConnection {
 
     public DaoConnection() {
-        
+
     }
     private Connection conectar;
     private Propieties Propiet = new Propieties();
@@ -25,6 +26,7 @@ public class DaoConnection {
 
     public Connection ExtablecerC() {
         conectar = null;
+
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             //System.out.println("cadena= "+cadena);
@@ -32,13 +34,15 @@ public class DaoConnection {
             //JOptionPane.showMessageDialog(null, "Se establecio la conexion exitosamente");
         } catch (HeadlessException | ClassNotFoundException | SQLException e) {
             //System.out.println("ex " + e);
-            JOptionPane.showMessageDialog(null, "No se logro conectar a la base de datos\n"+e, "ERROR!!", JOptionPane.ERROR_MESSAGE);
+            final JDialog dialog = new JDialog();
+            dialog.setAlwaysOnTop(true);
+            JOptionPane.showMessageDialog(dialog, "No se logro conectar a la base de datos\n" + e, "ERROR!!", JOptionPane.ERROR_MESSAGE);
         }
         //System.out.println("conectar " + conectar);
         return conectar;
 
     }
-    
+
     public int RetornarId(String Consulta) {
         int id = 0;
         try {

@@ -48,7 +48,8 @@ public class ProductoDao {
             paramsSql.add(2, Double.toString(product.getPrecio()));
 
             exito = dao.GenericUpdate(Query, paramsSql);
-
+            
+            paramsSql.clear();
             dao.getCloseC();
             return exito;
         }
