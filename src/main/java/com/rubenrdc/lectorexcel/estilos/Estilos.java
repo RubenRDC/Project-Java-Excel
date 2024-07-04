@@ -17,7 +17,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author Ruben
  */
-public class Estilo {
+public class Estilos {
 
     public static class BuilderCell {
 

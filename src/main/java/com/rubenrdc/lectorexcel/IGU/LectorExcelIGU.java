@@ -1,6 +1,6 @@
 package com.rubenrdc.lectorexcel.IGU;
 
-import com.rubenrdc.lectorexcel.estilos.Estilo;
+import com.rubenrdc.lectorexcel.estilos.Estilos;
 import com.rubenrdc.lectorexcel.models.Producto;
 import com.rubenrdc.lectorexcel.models.Users;
 import com.rubenrdc.lectorexcel.models.dao.ProductoDao;
@@ -496,13 +496,13 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                     try (XSSFWorkbook libro = new XSSFWorkbook()) {
                         outFile = new FileOutputStream(f);
 
-                        XSSFCellStyle estiloTitulos = new Estilo.BuilderCell()
+                        XSSFCellStyle estiloTitulos = new Estilos.BuilderCell()
                                 .setBoldText(true)
                                 .setColorText("FFFFFF")
                                 .setColorFondoHEX("")
                                 .setTipoDeRellenoFondo(FillPatternType.SOLID_FOREGROUND)
                                 .contruirEstilo(libro);
-                        XSSFCellStyle estiloFecha = new Estilo.BuilderCell().setFontFormat("dd/MM/yyyy").contruirEstilo(libro);
+                        XSSFCellStyle estiloFecha = new Estilos.BuilderCell().setFontFormat("dd/MM/yyyy").contruirEstilo(libro);
                         XSSFSheet createSheet = libro.createSheet();
 
                         int indexRenglon = 0;
