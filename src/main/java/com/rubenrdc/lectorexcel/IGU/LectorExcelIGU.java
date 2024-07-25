@@ -1,20 +1,25 @@
 package com.rubenrdc.lectorexcel.IGU;
 
-import static com.rubenrdc.lectorexcel.models.dao.genericEntityDao.*;
+import com.rubenrdc.lectorexcel.models.dao.EntityDao;
+import com.rubenrdc.lectorexcel.models.interfaces.Utilities;
 import java.util.List;
 
 /**
  *
  * @author Ruben
  */
-public class LectorExcelIGU extends javax.swing.JFrame {
-    
+public class LectorExcelIGU extends javax.swing.JFrame implements Utilities{
+
+    private List<String> columnTableEntitys;
+    private List<Integer> columnTableTypes;
+    private final EntityDao genericEntityDao = new EntityDao();
+
     public LectorExcelIGU() {
         this.setResizable(false);
         initComponents();
         cargarEntidades();
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -42,15 +47,11 @@ public class LectorExcelIGU extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel2.setPreferredSize(new java.awt.Dimension(350, 12));
-
         tbleObjectValidos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         tbleObjectValidos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                null
             },
             new String [] {
-
             }
         ){
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -89,7 +90,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addComponent(ImportBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 132, Short.MAX_VALUE)
                 .addComponent(SaveReportBtnAdm, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -125,7 +126,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         selectEntity.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         selectEntity.setMaximumSize(new java.awt.Dimension(72, 32));
         selectEntity.setMinimumSize(new java.awt.Dimension(72, 32));
-        selectEntity.setPreferredSize(new java.awt.Dimension(72, 32));
+        selectEntity.setPreferredSize(new java.awt.Dimension(240, 32));
         selectEntity.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 selectEntityItemStateChanged(evt);
@@ -148,17 +149,17 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
-                            .addComponent(SelectFileBtn, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createSequentialGroup()
+                                .addComponent(SelectFileBtn)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.LEADING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(getListExpEntityBtn, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(selectEntity, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(getListExpEntityBtn)))))
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -180,12 +181,11 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jPanel4.setPreferredSize(new java.awt.Dimension(350, 176));
+        jPanel4.setPreferredSize(new java.awt.Dimension(400, 245));
 
         tbleObjectInvalidos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         tbleObjectInvalidos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                null
             },
             new String [] {
 
@@ -216,7 +216,7 @@ public class LectorExcelIGU extends javax.swing.JFrame {
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
@@ -252,8 +252,8 @@ public class LectorExcelIGU extends javax.swing.JFrame {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(0, 0, 0))
         );
 
@@ -288,20 +288,21 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     }//GEN-LAST:event_ImportBtnMouseClicked
 
     private void getListExpEntityBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_getListExpEntityBtnMouseClicked
-
+        llenarTabla(tbleObjectValidos, genericEntityDao.getInfoTable(selectEntity.getSelectedItem().toString()));
     }//GEN-LAST:event_getListExpEntityBtnMouseClicked
 
     private void selectEntityItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_selectEntityItemStateChanged
-        if ( evt.getStateChange()==java.awt.event.ItemEvent.SELECTED) {
-            cargarColumnas(selectEntity.getSelectedItem().toString());
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+            String toString = selectEntity.getSelectedItem().toString();
+            cargarColumnas(toString);
+            clearTable(tbleObjectValidos);
+            clearTable(tbleObjectInvalidos);
         }
     }//GEN-LAST:event_selectEntityItemStateChanged
-    
+
     private void cargarEntidades() {
-        
         selectEntity.removeAllItems();
-        
-        List<String> tableNameEntitys = getTableNameEntitys();
+        List<String> tableNameEntitys = genericEntityDao.getTableNameEntitys();
         if (tableNameEntitys != null) {
             for (String tableNameEntity : tableNameEntitys) {
                 selectEntity.addItem(tableNameEntity);
@@ -310,10 +311,13 @@ public class LectorExcelIGU extends javax.swing.JFrame {
     }
 
     private void cargarColumnas(String Table) {
-        List<String> columTable = getColumTable(Table);
-        if (columTable != null) {
-            System.out.println(columTable);
-        }
+        genericEntityDao.getColumTable(Table);
+
+        columnTableEntitys = genericEntityDao.getColumnTableEntitys();
+        columnTableTypes = genericEntityDao.getColumnTableTypes();
+
+        setColumTable(tbleObjectValidos, columnTableEntitys);
+        setColumTable(tbleObjectInvalidos, columnTableEntitys);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

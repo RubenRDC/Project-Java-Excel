@@ -7,8 +7,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
@@ -41,19 +39,6 @@ public class DaoConnection {
 
     }
 
-    public int RetornarId(String Consulta) {
-        int id = 0;
-        try {
-            PreparedStatement cs = conectar.prepareStatement(Consulta);
-            ResultSet rs = cs.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt("id");
-            }
-        } catch (SQLException ex) {
-        }
-        return id;
-    }
-
     public void getCloseC() {
         if (conectar != null) {
             try {
@@ -64,20 +49,6 @@ public class DaoConnection {
             }
         }
 
-    }
-
-    public ResultSet QueryById(String Query, int IdParam) {
-
-        try {
-            PreparedStatement ps = conectar.prepareStatement(Query);
-            ps.setInt(1, IdParam);
-            ResultSet rs = ps.executeQuery();
-
-            return rs;
-        } catch (SQLException ex) {
-
-        }
-        return null;
     }
 
     public boolean GenericUpdate(String Query, java.util.List<String> params) {
@@ -113,6 +84,16 @@ public class DaoConnection {
         }
         return null;
     }
+    public ResultSet GenericQuery(String Query) {
+        try {
+            PreparedStatement ps = conectar.prepareStatement(Query);
+            ResultSet rs = ps.executeQuery();
+            return rs;
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        }
+        return null;
+    }
 
     public ResultSet getTablesDDBB() {
         try {
@@ -127,7 +108,6 @@ public class DaoConnection {
         try {
             String BaseDeDatos = conectar.getCatalog();
             ResultSet columns = conectar.getMetaData().getColumns(BaseDeDatos, null, Table, null);
-            
             return columns;
         } catch (SQLException ex) {
         }
