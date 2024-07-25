@@ -2,10 +2,13 @@ package com.rubenrdc.lectorexcel.models.dao;
 
 import java.awt.HeadlessException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
@@ -26,19 +29,14 @@ public class DaoConnection {
 
     public Connection ExtablecerC() {
         conectar = null;
-
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            //System.out.println("cadena= "+cadena);
             conectar = DriverManager.getConnection(cadena, Propiet.getUser(), Propiet.getPass());
-            //JOptionPane.showMessageDialog(null, "Se establecio la conexion exitosamente");
         } catch (HeadlessException | ClassNotFoundException | SQLException e) {
-            //System.out.println("ex " + e);
             final JDialog dialog = new JDialog();
             dialog.setAlwaysOnTop(true);
             JOptionPane.showMessageDialog(dialog, "No se logro conectar a la base de datos\n" + e, "ERROR!!", JOptionPane.ERROR_MESSAGE);
         }
-        //System.out.println("conectar " + conectar);
         return conectar;
 
     }
@@ -52,7 +50,6 @@ public class DaoConnection {
                 id = rs.getInt("id");
             }
         } catch (SQLException ex) {
-            //System.out.println("ex= " + ex);
         }
         return id;
     }
@@ -115,5 +112,37 @@ public class DaoConnection {
             System.out.println(ex);
         }
         return null;
+    }
+
+    public ResultSet getTablesDDBB() {
+        try {
+            String BaseDeDatos = conectar.getCatalog();
+            ResultSet tables = conectar.getMetaData().getTables(BaseDeDatos, null, null, new String[]{"TABLE"});
+            return tables;
+        } catch (SQLException ex) {
+        }
+        return null;
+    }
+    public ResultSet getColumTable(String Table) {
+        try {
+            String BaseDeDatos = conectar.getCatalog();
+            ResultSet columns = conectar.getMetaData().getColumns(BaseDeDatos, null, Table, null);
+            
+            return columns;
+        } catch (SQLException ex) {
+        }
+        return null;
+    }
+
+    public void getInfoConnection() {
+        try {
+            String catalog = conectar.getCatalog();
+            System.out.println("Conectado a: " + catalog);
+            DatabaseMetaData metaData = conectar.getMetaData();
+            System.out.println("Nombre de Base de datos: " + conectar.getSchema());
+            System.out.println("Nombre del Driver: " + metaData.getDriverName());
+            System.out.println("Version del Driver: " + metaData.getDriverVersion());
+        } catch (SQLException ex) {
+        }
     }
 }
