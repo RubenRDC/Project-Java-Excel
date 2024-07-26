@@ -19,7 +19,6 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
 
     private final EntityDao genericEntityDao = new EntityDao();
     private final LogicImpExpEntity logicImpExpEntity = new LogicImpExpEntity(this);
-    private List<Integer> importReportExcel;
 
     public LectorExcelIGU() {
         this.setResizable(false);
@@ -307,6 +306,7 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
             LoadingJDialog loadingJDialog = new LoadingJDialog(this, false);
             loadingJDialog.setVisible(true);
             //logicImpExpEntity.exportReportExcel(loadingJDialog, StartfileChooser, columnTableEntitys, columnTableTypes);
+            logicImpExpEntity.loadReportExcelInfo(loadingJDialog, StartfileChooser, columnTableEntitys, columnTableTypes);
         }
     }//GEN-LAST:event_SelectFileBtnMouseClicked
 
@@ -364,6 +364,17 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
         setColumTable(tbleObjectValidos, columnTableEntitys);
         setColumTable(tbleObjectInvalidos, columnTableEntitys);
     }
+
+    public void setEntitysValidos(List<Object[]> entitysValidos) {
+        llenarTabla(tbleObjectValidos, entitysValidos);
+        this.entitysValidos = entitysValidos;
+    }
+
+    public void setEntitysInvalidos(List<Object[]> entitysInvalidos) {
+        llenarTabla(tbleObjectInvalidos, entitysInvalidos);
+        this.entitysInvalidos = entitysInvalidos;
+    }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ImportBtn;

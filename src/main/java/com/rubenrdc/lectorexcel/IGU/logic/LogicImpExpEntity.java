@@ -5,6 +5,7 @@ import com.rubenrdc.lectorexcel.IGU.LoadingJDialog;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
@@ -21,17 +22,23 @@ public class LogicImpExpEntity {
     private JFileChooser fileChooser;
     private final LectorExcelIGU fatherIGU;
     private ExportLogic swingLogicExport;
-    private List<Object[]> listEntitysValidos;
-    private List<Object[]> listEntitysInvalidos;
-    private List<List> UsuariosVyI;
+    private ImportLogic swingLogicImport;
+    private List<List<Object[]>> entitysVyI = new ArrayList<>();
 
     public LogicImpExpEntity(LectorExcelIGU father) {
         this.fatherIGU = father;
     }
 
-    public void exportReportExcel(LoadingJDialog loadingJDialog, File f,List<String> columnTableEntitys,List<Integer> columnTableTypes,List<Object[]> listSave) {
-        swingLogicExport = new ExportLogic(loadingJDialog,f,columnTableEntitys,columnTableTypes,listSave);
+    public void exportReportExcel(LoadingJDialog loadingJDialog, File outFile, List<String> columnTableEntitys, List<Integer> columnTableTypes, List<Object[]> listSave) {
+        swingLogicExport = null;
+        swingLogicExport = new ExportLogic(loadingJDialog, outFile, columnTableEntitys, columnTableTypes, listSave);
         swingLogicExport.execute();
+    }
+
+    public void loadReportExcelInfo(LoadingJDialog loadingJDialog, File intFile, List<String> columnTableEntitys, List<Integer> columnTableTypes) {
+        swingLogicImport = null;
+        swingLogicImport = new ImportLogic(loadingJDialog, intFile, columnTableEntitys, columnTableTypes, entitysVyI);
+        swingLogicImport.execute();
     }
 
     public File StartfileChooser(int mode) {
@@ -80,5 +87,19 @@ public class LogicImpExpEntity {
     private String ObtenerFechaHora() {
         LocalDateTime date = LocalDateTime.now();
         return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss"));
+    }
+
+    public List<Object[]> getListEntitysValidos() {
+        if (!entitysVyI.isEmpty()) {
+            return entitysVyI.get(0);
+        }
+        return null;
+    }
+
+    public List<Object[]> getListEntitysInvalidos() {
+        if (!entitysVyI.isEmpty()) {
+            return entitysVyI.get(1);
+        }
+        return null;
     }
 }
