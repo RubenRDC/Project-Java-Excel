@@ -61,7 +61,7 @@ public class EntityDao {
                 while(GenericQuery.next()){
                     aux = new Object[cantColumn];
                     for (int x = 1; x <= cantColumn; x++) {
-                        aux[(x-1)]=GenericQuery.getString(x);
+                        aux[(x-1)]=GenericQuery.getObject(x);
                     }
                     listO.add(aux);
                 }
