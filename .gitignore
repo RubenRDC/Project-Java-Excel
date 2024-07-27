@@ -39,3 +39,4 @@ Thumbs.db
 /target
 *.properties
 /log
+nbactions.xml
