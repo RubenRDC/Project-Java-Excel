@@ -5,6 +5,7 @@ import com.rubenrdc.lectorexcel.models.dao.EntityDao;
 import com.rubenrdc.lectorexcel.models.interfaces.Utilities;
 import java.io.File;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -305,30 +306,52 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
             txtImportPath.setText(StartfileChooser.toString());
             LoadingJDialog loadingJDialog = new LoadingJDialog(this, false);
             loadingJDialog.setVisible(true);
-            //logicImpExpEntity.exportReportExcel(loadingJDialog, StartfileChooser, columnTableEntitys, columnTableTypes);
             logicImpExpEntity.loadReportExcelInfo(loadingJDialog, StartfileChooser, columnTableEntitys, columnTableTypes);
         }
     }//GEN-LAST:event_SelectFileBtnMouseClicked
 
     private void saveInfoBtnAdmMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveInfoBtnAdmMouseClicked
-        File StartfileChooser = logicImpExpEntity.StartfileChooser(LogicImpExpEntity.FILE_CHOOSER_EXPORT);
-        if (StartfileChooser != null) {
-            LoadingJDialog loadingJDialog = new LoadingJDialog(this, false);
-            loadingJDialog.setVisible(true);
-            logicImpExpEntity.exportReportExcel(loadingJDialog, StartfileChooser, columnTableEntitys, columnTableTypes, entitysValidos);
+        if (entitysValidos != null) {
+            if (!entitysValidos.isEmpty()) {
+                File StartfileChooser = logicImpExpEntity.StartfileChooser(LogicImpExpEntity.FILE_CHOOSER_EXPORT);
+                if (StartfileChooser != null) {
+                    LoadingJDialog loadingJDialog = new LoadingJDialog(this, false);
+                    loadingJDialog.setVisible(true);
+                    logicImpExpEntity.exportReportExcel(loadingJDialog, StartfileChooser, columnTableEntitys, columnTableTypes, entitysValidos);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "No Hay informacion exportable.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No Hay informacion exportable.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_saveInfoBtnAdmMouseClicked
 
     private void SaveReportBtnNoAdmMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SaveReportBtnNoAdmMouseClicked
-        File StartfileChooser = logicImpExpEntity.StartfileChooser(LogicImpExpEntity.FILE_CHOOSER_EXPORT);
-        if (StartfileChooser != null) {
-            LoadingJDialog loadingJDialog = new LoadingJDialog(this, false);
-            loadingJDialog.setVisible(true);
-            logicImpExpEntity.exportReportExcel(loadingJDialog, StartfileChooser, columnTableEntitys, columnTableTypes, entitysInvalidos);
+        if (entitysInvalidos != null) {
+            if (!entitysInvalidos.isEmpty()) {
+                File StartfileChooser = logicImpExpEntity.StartfileChooser(LogicImpExpEntity.FILE_CHOOSER_EXPORT);
+                if (StartfileChooser != null) {
+                    LoadingJDialog loadingJDialog = new LoadingJDialog(this, false);
+                    loadingJDialog.setVisible(true);
+                    logicImpExpEntity.exportReportExcel(loadingJDialog, StartfileChooser, columnTableEntitys, columnTableTypes, entitysInvalidos);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "No Hay informacion exportable.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No Hay informacion exportable.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_SaveReportBtnNoAdmMouseClicked
 
     private void ImportBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ImportBtnMouseClicked
+        if (entitysValidos != null) {
+            if (!entitysValidos.isEmpty()) {
+                
+                
+                
+            }
+        }
     }//GEN-LAST:event_ImportBtnMouseClicked
 
     private void getListExpEntityBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_getListExpEntityBtnMouseClicked
@@ -340,8 +363,7 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
         if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
             String toString = selectEntity.getSelectedItem().toString();
             cargarColumnas(toString);
-            clearTable(tbleObjectValidos);
-            clearTable(tbleObjectInvalidos);
+            clearContent();
         }
     }//GEN-LAST:event_selectEntityItemStateChanged
 
@@ -357,10 +379,10 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
 
     private void cargarColumnas(String Table) {
         genericEntityDao.getColumTable(Table);
-
+        
         columnTableEntitys = genericEntityDao.getColumnTableEntitys();
         columnTableTypes = genericEntityDao.getColumnTableTypes();
-
+        
         setColumTable(tbleObjectValidos, columnTableEntitys);
         setColumTable(tbleObjectInvalidos, columnTableEntitys);
     }
@@ -373,6 +395,19 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
     public void setEntitysInvalidos(List<Object[]> entitysInvalidos) {
         llenarTabla(tbleObjectInvalidos, entitysInvalidos);
         this.entitysInvalidos = entitysInvalidos;
+    }
+
+    private void clearContent() {
+        if (entitysValidos != null) {
+            entitysValidos.clear();
+            entitysValidos = null;
+        }
+        if (entitysInvalidos != null) {
+            entitysValidos.clear();
+            entitysValidos = null;
+        }
+        clearTable(tbleObjectValidos);
+        clearTable(tbleObjectInvalidos);
     }
 
 
