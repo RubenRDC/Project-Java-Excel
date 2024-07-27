@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -40,7 +41,7 @@ public class ImportLogic extends SwingWorker<Object, Object> {
         exito = false;
         loading.getParent().setEnabled(false);
         loading.getOwner().setAlwaysOnTop(true);
-
+        ZipSecureFile.setMinInflateRatio(0);//Permite cargar archivos Excel sin compresión.
         try (Workbook wb = WorkbookFactory.create(intFile)) {
             Object[] aux;
             //new Object[columnTableEntitys.size()];
@@ -73,7 +74,7 @@ public class ImportLogic extends SwingWorker<Object, Object> {
                     }
                     if (incon > 0) {
                         entitysI.add(aux);
-                    } else if(incon==0){
+                    } else if (incon == 0) {
                         entitysV.add(aux);
                     }
                     incon = 0;

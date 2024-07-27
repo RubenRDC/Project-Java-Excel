@@ -2,6 +2,7 @@ package com.rubenrdc.lectorexcel.IGU.logic;
 
 import com.rubenrdc.lectorexcel.IGU.LectorExcelIGU;
 import com.rubenrdc.lectorexcel.IGU.LoadingJDialog;
+import com.rubenrdc.lectorexcel.models.dao.EntityDao;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,7 +24,8 @@ public class LogicImpExpEntity {
     private final LectorExcelIGU fatherIGU;
     private ExportLogic swingLogicExport;
     private ImportLogic swingLogicImport;
-    private List<List<Object[]>> entitysVyI = new ArrayList<>();
+    private ImportMassDBLogic swingLogicImportDB;
+    private final List<List<Object[]>> entitysVyI = new ArrayList<>();
 
     public LogicImpExpEntity(LectorExcelIGU father) {
         this.fatherIGU = father;
@@ -39,6 +41,12 @@ public class LogicImpExpEntity {
         swingLogicImport = null;
         swingLogicImport = new ImportLogic(loadingJDialog, intFile, columnTableEntitys, columnTableTypes, entitysVyI);
         swingLogicImport.execute();
+    }
+
+    public void importDB(EntityDao entityDao,LoadingJDialog loading, List<String> columnTableEntitys, List<Object[]> listEntitysValidos, String table) {
+        swingLogicImportDB = null;
+        swingLogicImportDB = new ImportMassDBLogic(entityDao,loading, columnTableEntitys, listEntitysValidos, table);
+        swingLogicImportDB.execute();
     }
 
     public File StartfileChooser(int mode) {

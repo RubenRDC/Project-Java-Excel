@@ -51,39 +51,11 @@ public class DaoConnection {
 
     }
 
-    public boolean GenericUpdate(String Query, java.util.List<String> params) {
-        try {
-            PreparedStatement ps = conectar.prepareStatement(Query);
-            int index = 1;
-            for (String param : params) {
-                ps.setString(index, param);
-                index++;
-            }
-            int rs = ps.executeUpdate();
-            return rs > 0;
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return false;
+    public PreparedStatement getNewPreparedStatement(String Query) throws SQLException {
+        PreparedStatement ps = conectar.prepareStatement(Query);
+        return ps;
     }
 
-    public ResultSet GenericQuery(String Query, java.util.List<String> params) {
-        try {
-            PreparedStatement ps = conectar.prepareStatement(Query);
-            int index = 1;
-            if (params != null) {
-                for (String param : params) {
-                    ps.setString(index, param);
-                    index++;
-                }
-            }
-            ResultSet rs = ps.executeQuery();
-            return rs;
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return null;
-    }
     public ResultSet GenericQuery(String Query) {
         try {
             PreparedStatement ps = conectar.prepareStatement(Query);
@@ -104,6 +76,7 @@ public class DaoConnection {
         }
         return null;
     }
+
     public ResultSet getColumTable(String Table) {
         try {
             String BaseDeDatos = conectar.getCatalog();
@@ -114,15 +87,18 @@ public class DaoConnection {
         return null;
     }
 
-    public void getInfoConnection() {
+    public String getPk(String Table) {
         try {
-            String catalog = conectar.getCatalog();
-            System.out.println("Conectado a: " + catalog);
-            DatabaseMetaData metaData = conectar.getMetaData();
-            System.out.println("Nombre de Base de datos: " + conectar.getSchema());
-            System.out.println("Nombre del Driver: " + metaData.getDriverName());
-            System.out.println("Version del Driver: " + metaData.getDriverVersion());
+            String pk = "";
+            String BaseDeDatos = conectar.getCatalog();
+            ResultSet rs = conectar.getMetaData().getPrimaryKeys(BaseDeDatos, null, Table);
+            while (rs.next()) {
+                pk = rs.getString("COLUMN_NAME");
+            }
+            return pk;
         } catch (SQLException ex) {
+            System.out.println(ex);
         }
+        return null;
     }
 }

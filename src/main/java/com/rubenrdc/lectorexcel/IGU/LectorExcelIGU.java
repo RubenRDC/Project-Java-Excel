@@ -347,10 +347,14 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
     private void ImportBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ImportBtnMouseClicked
         if (entitysValidos != null) {
             if (!entitysValidos.isEmpty()) {
-                
-                
-                
+                LoadingJDialog loadingJDialog = new LoadingJDialog(this, false);
+                loadingJDialog.setVisible(true);
+                logicImpExpEntity.importDB(genericEntityDao,loadingJDialog, columnTableEntitys, entitysValidos, selectEntity.getSelectedItem().toString());
+            } else {
+                JOptionPane.showMessageDialog(this, "No Hay informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
             }
+        } else {
+            JOptionPane.showMessageDialog(this, "No Hay informacion importable.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_ImportBtnMouseClicked
 
@@ -363,7 +367,6 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
         if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
             String toString = selectEntity.getSelectedItem().toString();
             cargarColumnas(toString);
-            clearContent();
         }
     }//GEN-LAST:event_selectEntityItemStateChanged
 
@@ -379,14 +382,26 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
 
     private void cargarColumnas(String Table) {
         genericEntityDao.getColumTable(Table);
-        
+
         columnTableEntitys = genericEntityDao.getColumnTableEntitys();
         columnTableTypes = genericEntityDao.getColumnTableTypes();
-        
+
         setColumTable(tbleObjectValidos, columnTableEntitys);
         setColumTable(tbleObjectInvalidos, columnTableEntitys);
+        clearContent();
     }
-
+    private void clearContent() {
+        if (entitysValidos != null) {
+            entitysValidos.clear();
+            entitysValidos = null;
+        }
+        if (entitysInvalidos != null) {
+            entitysInvalidos.clear();
+            entitysInvalidos = null;
+        }
+        clearTable(tbleObjectValidos);
+        clearTable(tbleObjectInvalidos);
+    }
     public void setEntitysValidos(List<Object[]> entitysValidos) {
         llenarTabla(tbleObjectValidos, entitysValidos);
         this.entitysValidos = entitysValidos;
@@ -396,20 +411,6 @@ public class LectorExcelIGU extends javax.swing.JFrame implements Utilities {
         llenarTabla(tbleObjectInvalidos, entitysInvalidos);
         this.entitysInvalidos = entitysInvalidos;
     }
-
-    private void clearContent() {
-        if (entitysValidos != null) {
-            entitysValidos.clear();
-            entitysValidos = null;
-        }
-        if (entitysInvalidos != null) {
-            entitysValidos.clear();
-            entitysValidos = null;
-        }
-        clearTable(tbleObjectValidos);
-        clearTable(tbleObjectInvalidos);
-    }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ImportBtn;
