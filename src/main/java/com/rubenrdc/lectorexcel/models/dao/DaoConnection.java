@@ -2,7 +2,6 @@ package com.rubenrdc.lectorexcel.models.dao;
 
 import java.awt.HeadlessException;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
