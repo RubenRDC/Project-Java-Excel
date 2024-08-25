@@ -18,21 +18,16 @@ public class Propieties {
     private static String bd = "";
 
     public Propieties() {
-        iniciar();
     }
 
-    private void iniciar() {
+    public static void loadConfig() {
 
         Properties propiedades = new Properties();
         InputStream file = null;
         String userDirectoryPath = System.getProperty("user.dir");
-        //javax.swing.JOptionPane.showMessageDialog(null, userDirectoryPath);
         try {
-            //System.out.println(userDirectoryPath);
             file = new FileInputStream(userDirectoryPath+"/datos.properties");
-            //System.out.println("ES NULO");
             propiedades.load(file);
-            
             ip = propiedades.getProperty("ip");
             user = propiedades.getProperty("user");
             pass = propiedades.getProperty("pass");

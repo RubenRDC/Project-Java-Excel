@@ -19,16 +19,14 @@ public class DaoConnection {
 
     }
     private Connection conectar;
-    private Propieties Propiet = new Propieties();
-    private String puerto = "3306";
-
-    private String cadena = "jdbc:mysql://" + Propiet.getIp() + ":" + puerto + "/" + Propiet.getBd();
+    private final String PUERTO = "3306";
+    private final String CADENA = "jdbc:mysql://" + Propieties.getIp() + ":" + PUERTO + "/" + Propieties.getBd();
 
     public Connection ExtablecerC() {
         conectar = null;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conectar = DriverManager.getConnection(cadena, Propiet.getUser(), Propiet.getPass());
+            conectar = DriverManager.getConnection(CADENA, Propieties.getUser(), Propieties.getPass());
         } catch (HeadlessException | ClassNotFoundException | SQLException e) {
             final JDialog dialog = new JDialog();
             dialog.setAlwaysOnTop(true);
