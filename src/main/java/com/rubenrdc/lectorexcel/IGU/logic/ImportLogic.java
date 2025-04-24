@@ -66,11 +66,11 @@ public class ImportLogic extends SwingWorker<Object, Object> {
                         Cell c = row.getCell(cn, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
 
                         aux[cn] = setCellByType(c, columnTableTypes.get(cn));
-
-                        if (aux[cn].equals("*Incompatible.*")) {
-                            incon++;
+                        if (aux[cn] != null) {
+                            if (aux[cn].equals("*Incompatible.*")) {
+                                incon++;
+                            }
                         }
-
                     }
                     if (incon > 0) {
                         entitysI.add(aux);
@@ -114,10 +114,22 @@ public class ImportLogic extends SwingWorker<Object, Object> {
             case java.sql.Types.VARCHAR -> {
                 if (Cell.getCellType() == CellType.STRING) {
                     return Cell.getStringCellValue();
+                } else if (isBlank(Cell.getCellType())) {
+                    return null;
                 } else {
                     return "*Incompatible.*";
                 }
             }
+            case java.sql.Types.BLOB -> {
+                if (Cell.getCellType() == CellType.STRING) {
+                    return Cell.getStringCellValue();
+                } else if (isBlank(Cell.getCellType())) {
+                    return null;
+                } else {
+                    return "*Incompatible.*";
+                }
+            }
+
             case java.sql.Types.INTEGER -> {
                 if (Cell.getCellType() == CellType.NUMERIC) {
                     return ((int) Cell.getNumericCellValue());
@@ -128,7 +140,6 @@ public class ImportLogic extends SwingWorker<Object, Object> {
             case java.sql.Types.DOUBLE -> {
                 if (Cell.getCellType() == CellType.NUMERIC) {
                     return Cell.getNumericCellValue();
-
                 } else {
                     return "*Incompatible.*";
                 }
@@ -143,7 +154,8 @@ public class ImportLogic extends SwingWorker<Object, Object> {
             case java.sql.Types.DATE -> {
                 if (Cell.getCellType() == CellType.NUMERIC) {
                     return Cell.getDateCellValue();
-
+                } else if (isBlank(Cell.getCellType())) {
+                    return null;
                 } else {
                     return "*Incompatible.*";
                 }
@@ -152,5 +164,12 @@ public class ImportLogic extends SwingWorker<Object, Object> {
                 return "*Incompatible.*";
             }
         }
+    }
+
+    private boolean isBlank(CellType type) {
+        if (CellType.BLANK == type) {
+            return true;
+        }
+        return false;
     }
 }
